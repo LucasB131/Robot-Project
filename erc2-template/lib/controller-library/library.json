@@ -1,0 +1,44 @@
+{
+  "name": "controller-library",
+  "version": "1.0.0",
+  "description": "Student-facing library for the Arduino Mega 2560-based 2nd Generation FEH Robot Controller.",
+  "authors": [
+    {
+      "name": "Laine Rumreich",
+      "email": "rumreich.1@osu.edu",
+      "maintainer": true
+    },
+    {
+      "name": "Brian Jia",
+      "email": "jia.659@osu.edu",
+      "maintainer": true
+    },
+    {
+      "name": "Jayson Clark",
+      "email": "clark.4190@osu.edu",
+      "maintainer": true
+    },
+    {
+      "name": "Adam Exley",
+      "email": "exley.8@osu.edu",
+      "maintainer": true
+    }
+  ],
+  "frameworks": "arduino",
+  "platforms": "atmelavr",
+  "export": {
+    "exclude": [
+      "private/*"
+    ]
+  },
+  "dependencies": {
+    "adafruit/Adafruit ILI9341": "*",
+    "adafruit/Adafruit FT6206 Library": "*",
+    "adafruit/Adafruit GFX Library": "*",
+    "adafruit/Adafruit BusIO": "*",
+    "greiman/SdFat": "*",
+    "paulstoffregen/Encoder": "*",
+    "Wire": "*",
+    "SPI": "*"
+  }
+}
