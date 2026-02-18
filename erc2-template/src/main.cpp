@@ -11,6 +11,7 @@ DigitalInputPin back_right_bump_switch(FEHIO::Pin13);
 DigitalInputPin front_right_bump_switch(FEHIO::Pin14);
 DigitalInputPin front_left_bump_switch(FEHIO::Pin15);
 
+bool startit = true;
 bool start = false;
 bool second = false;
 bool third = false;
@@ -27,29 +28,37 @@ void ERCMain()
         bool front_right = front_right_bump_switch.Value();
         bool front_left = front_left_bump_switch.Value();
 
-        if (back_left)
-        {
-            start = true;
+        if (startit) {
+            if (!back_left) 
+            {
+                start = true;
+                startit = false;
+            }
         }
 
-        if (start)
+        if (start) 
         {
             left_motor.SetPercent(40);
             right_motor.SetPercent(40);
 
-            if (front_right || front_left)
+            if (!front_right && !front_left)
             {
-                second = true;
                 start = false;
+                second = true;
             }
         }
 
-        else if (second)
+        else if (second) 
         {
-            left_motor.SetPercent(30);
-            right_motor.SetPercent(-40);
+            
+            left_motor.SetPercent(20);
+            right_motor.SetPercent(-20);
+            Sleep(5.0);
+            
 
-            if (back_right || back_left)
+            
+
+            if (!back_right && !back_left)
             {
                 second = false;
                 third = true;
@@ -58,10 +67,10 @@ void ERCMain()
 
         else if (third)
         {
-            left_motor.SetPercent(40);
-            right_motor.SetPercent(40);
+            left_motor.SetPercent(-20);
+            right_motor.SetPercent(-40);
 
-            if (front_left || front_right)
+            if (!front_left && !front_right)
             {
                 third = false;
                 fourth = true;
@@ -71,9 +80,9 @@ void ERCMain()
         else if (fourth)
         {
             left_motor.SetPercent(-40);
-            right_motor.SetPercent(30);
+            right_motor.SetPercent(-20);
 
-            if (back_right || back_left)
+            if (!back_right && !back_left)
             {
                 fourth = false;
                 fifth = true;
@@ -85,7 +94,7 @@ void ERCMain()
             left_motor.SetPercent(40);
             right_motor.SetPercent(40);
 
-            if (front_left || front_right)
+            if (!front_left && !front_right)
             {
                 fifth = false;
 
