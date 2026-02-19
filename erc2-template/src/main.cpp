@@ -17,6 +17,7 @@ bool second = false;
 bool third = false;
 bool fourth = false;
 bool fifth = false;
+bool sixth = false;
 
 void ERCMain()
 {
@@ -28,6 +29,10 @@ void ERCMain()
         bool front_right = front_right_bump_switch.Value();
         bool front_left = front_left_bump_switch.Value();
 
+        float forward_speed = 30;
+        float backward_speed = -20;
+        float turn_speed = 20;
+
         if (startit) {
             if (!back_left) 
             {
@@ -38,8 +43,8 @@ void ERCMain()
 
         if (start) 
         {
-            left_motor.SetPercent(40);
-            right_motor.SetPercent(40);
+            left_motor.SetPercent(forward_speed);
+            right_motor.SetPercent(forward_speed);
 
             if (!front_right && !front_left)
             {
@@ -50,25 +55,22 @@ void ERCMain()
 
         else if (second) 
         {
-            
-            left_motor.SetPercent(20);
-            right_motor.SetPercent(-20);
-            Sleep(5.0);
-            
+            left_motor.SetPercent(backward_speed);
+            left_motor.SetPercent(backward_speed);
+            Sleep(1.0);
 
+            left_motor.SetPercent(turn_speed);
+            right_motor.SetPercent(-(turn_speed));
+            Sleep(1.0);
             
-
-            if (!back_right && !back_left)
-            {
-                second = false;
-                third = true;
-            }
+            second = false;
+            third = true;
         }
 
         else if (third)
         {
-            left_motor.SetPercent(-20);
-            right_motor.SetPercent(-40);
+            left_motor.SetPercent(backward_speed);
+            right_motor.SetPercent(backward_speed);
 
             if (!front_left && !front_right)
             {
@@ -79,8 +81,8 @@ void ERCMain()
 
         else if (fourth)
         {
-            left_motor.SetPercent(-40);
-            right_motor.SetPercent(-20);
+            left_motor.SetPercent(forward_speed);
+            right_motor.SetPercent(forward_speed);
 
             if (!back_right && !back_left)
             {
@@ -91,16 +93,31 @@ void ERCMain()
 
         else if (fifth)
         {
-            left_motor.SetPercent(40);
-            right_motor.SetPercent(40);
+            left_motor.SetPercent(backward_speed);
+            right_motor.SetPercent(backward_speed);
+            Sleep(1.0);
 
-            if (!front_left && !front_right)
+            left_motor.SetPercent(-(turn_speed));
+            right_motor.SetPercent(turn_speed);
+            Sleep(1.0);
+
+            left_motor.SetPercent(backward_speed);
+            right_motor.SetPercent(backward_speed);
+
+            if (!back_left && !back_right)
             {
                 fifth = false;
-
-                left_motor.Stop();
-                right_motor.Stop();
+                sixth = true;
             }
+        }
+
+        else if (sixth) 
+        {
+            left_motor.SetPercent(forward_speed);
+            right_motor.SetPercent(forward_speed);
+
+            left_motor.Stop();
+            right_motor.Stop();
         }
     }
 }
