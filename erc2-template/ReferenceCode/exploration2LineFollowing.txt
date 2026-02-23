@@ -1,0 +1,80 @@
+#include <FEHLCD.h>
+#include <FEHIO.h>
+#include <FEHSD.h>
+#include <FEH.h>
+#include <Arduino.h>
+#include <FEHUtility.h>
+
+// check pins
+AnalogInputPin right_opto(FEHIO::Pin11);
+AnalogInputPin middle_opto(FEHIO::Pin12);
+AnalogInputPin left_opto(FEHIO::Pin13);
+FEHMotor left_motor(FEHMotor::Motor1, 9.0);
+FEHMotor right_motor(FEHMotor::Motor0, 9.0);
+
+void ERCMain()
+{
+    float threshhold = 2.5;
+
+    bool left, middle, right; // false is off, true is on
+
+    float goFasterSpeed = 40, goSpeed = 18, slowSpeed = 12;
+
+    while (true) {
+        if (left_opto.Value() > threshhold) {
+            left = true;
+        }
+        else {
+            left = false;
+        }
+        if (middle_opto.Value() > threshhold) {
+            middle = true;
+        }
+        else {
+            middle = false;
+        }
+        if (right_opto.Value() > threshhold) {
+            right = true;
+        } else {
+            right = false;
+        }
+
+        if (left && middle && !right) {
+            // right is off, turn left
+            left_motor.SetPercent(goSpeed);
+            right_motor.SetPercent(goFasterSpeed);
+        }   
+        if (left && !middle && !right) {
+            // middle and right are off, turn left
+            left_motor.SetPercent(slowSpeed);
+            right_motor.SetPercent(goFasterSpeed);
+
+        }
+        if (!left && middle && right) {
+            // left is off, turn right
+            left_motor.SetPercent(goFasterSpeed);
+            right_motor.SetPercent(goSpeed);
+        }
+        if (!left && !middle && right) {
+            // left and middle are off, turn right
+            left_motor.SetPercent(goFasterSpeed);
+            right_motor.SetPercent(slowSpeed);
+        }
+        if (!left && middle && !right) {
+            // left and right are off, go straight
+            left_motor.SetPercent(goSpeed);
+            right_motor.SetPercent(goSpeed);
+        }
+        if (left && middle && right) {
+            // all on?
+            left_motor.SetPercent(goSpeed);
+            right_motor.SetPercent(goSpeed);
+        }
+        if (!left && !middle && !right) {
+            // all are off, add correction logic
+            left_motor.SetPercent(0);
+            right_motor.SetPercent(0);
+        }
+    }
+}
+
