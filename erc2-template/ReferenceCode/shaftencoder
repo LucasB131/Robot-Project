@@ -1,0 +1,54 @@
+#include <FEHLCD.h>
+#include <FEHIO.h>
+#include <FEHUtility.h>
+#include <FEHMotor.h>
+
+//Declarations for encoders & motors
+DigitalEncoder right_encoder(FEHIO::Pin13);
+DigitalEncoder left_encoder(FEHIO::Pin14);
+FEHMotor right_motor(FEHMotor::Motor0,9.0);
+FEHMotor left_motor(FEHMotor::Motor1,9.0);
+
+void ERCMain()
+{
+    right_motor.SetPercent(30);
+    left_motor.SetPercent(30);
+    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < 564);        //Move forward 14 inches
+    right_motor.Stop();
+    left_motor.Stop();
+    right_encoder.ResetCounts();
+    left_encoder.ResetCounts();
+
+    right_motor.SetPercent(30);
+    left_motor.SetPercent(-30);
+    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < 250);         //Turn left 90 degrees
+    right_motor.Stop();
+    left_motor.Stop();
+    right_encoder.ResetCounts();
+    left_encoder.ResetCounts();
+
+    right_motor.SetPercent(30);
+    left_motor.SetPercent(30);
+    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < 403);         //Move forward 10 inches
+    right_motor.Stop();
+    left_motor.Stop();
+    right_encoder.ResetCounts();
+    left_encoder.ResetCounts();
+
+    right_motor.SetPercent(-30);
+    left_motor.SetPercent(30);
+    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < 250);          //Turn right 90 degrees
+    right_motor.Stop();
+    left_motor.Stop();
+    right_encoder.ResetCounts();
+    left_encoder.ResetCounts();
+
+    right_motor.SetPercent(30);
+    left_motor.SetPercent(30);
+    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < 161);         //Move forward 4 inches
+    right_motor.Stop();
+    left_motor.Stop();
+    right_encoder.ResetCounts();
+    left_encoder.ResetCounts();
+}
+
