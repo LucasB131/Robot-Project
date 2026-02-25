@@ -24,6 +24,9 @@ DigitalEncoder left_encoder(FEHIO::Pin15);
 #define ROBOT_RADIUS 1.0 // tbd
 #define IGWAN_TRANASITIONS 318.
 
+#define GO_SPEED 20
+#define BACK_SPEED 20
+
 void ERCMain()
 {
     TestGUI();
@@ -78,18 +81,32 @@ void goForwardOrBackward(bool forward, float distance) {
     // s = 2(pi)rn/N // n = sN/2(pi)r
     int countsLimit = (distance*IGWAN_TRANASITIONS)/(2*PI*WHEEL_RADIUS);
     if (forward) {
-        left_motor.SetPercent(20);
-        right_motor.SetPercent(20);
+        left_motor.SetPercent(GO_SPEED);
+        right_motor.SetPercent(GO_SPEED);
     } else {
-        left_motor.SetPercent(-20);
-        right_motor.SetPercent(-20);
+        left_motor.SetPercent(BACK_SPEED);
+        right_motor.SetPercent(BACK_SPEED);
     }
     while(((left_encoder.Counts() + right_encoder.Counts()) / 2.) < countsLimit);
     right_encoder.ResetCounts();
     left_encoder.ResetCounts();
 }
 
-// Turns certain degrees clockwise
-void turnCWAngle(int degrees) {
-
+// Turns certain degrees clockwise or counter-clockwise
+void turnCWAngle(int degrees, bool CW) {
+    // transform arc length to linear distance
+    float theta = degrees * (PI/180.);
+    float distance = ROBOT_RADIUS*theta;
+    int countsLimit = (distance*IGWAN_TRANASITIONS)/(2*PI*WHEEL_RADIUS);
+    // go linear distance opposite direction for wheels
+    if (CW) {
+        left_motor.SetPercent(GO_SPEED);
+        right_motor.SetPercent(BACK_SPEED);
+    } else {
+        left_motor.SetPercent(BACK_SPEED);
+        right_motor.SetPercent(GO_SPEED);
+    }
+    while(((left_encoder.Counts() + right_encoder.Counts()) / 2.) < countsLimit);
+    right_encoder.ResetCounts();
+    left_encoder.ResetCounts();
 }
