@@ -1,132 +1,66 @@
 #include <FEH.h>
+#include <FEHLCD.h>
+#include <FEHIO.h>
+#include <FEHSD.h>
+#include <FEHUtility.h>
 #include <Arduino.h>
 
-AnalogInputPin sensor(FEHIO::Pin0);
+// exact pin locations to change
+FEHMotor left_motor(FEHMotor::Motor1, 9.0);
+FEHMotor right_motor(FEHMotor::Motor0, 9.0);
 
-FEHMotor left_motor(FEHMotor::Motor0, 9.0);
-FEHMotor right_motor(FEHMotor::Motor1, 9.0);
+AnalogInputPin right_opto(FEHIO::Pin11);
+AnalogInputPin middle_opto(FEHIO::Pin12);
+AnalogInputPin left_opto(FEHIO::Pin13);
 
-DigitalInputPin back_left_bump_switch(FEHIO::Pin12);
-DigitalInputPin back_right_bump_switch(FEHIO::Pin13);
-DigitalInputPin front_right_bump_switch(FEHIO::Pin14);
-DigitalInputPin front_left_bump_switch(FEHIO::Pin15);
-
-bool startit = true;
-bool start = false;
-bool second = false;
-bool third = false;
-bool fourth = false;
-bool fifth = false;
-bool sixth = false;
-bool seventh = false;
+// Global Constants
+#define SENSOR_THRESHOLD 2.5
 
 void ERCMain()
 {
-    while (true)
-    {
+    TestGUI();
+}
 
-        bool back_left = back_left_bump_switch.Value();
-        bool back_right = back_right_bump_switch.Value();
-        bool front_right = front_right_bump_switch.Value();
-        bool front_left = front_left_bump_switch.Value();
+// Follows the line
+// (to change?): until all three sensors are off
+void followLine() {
+    bool left, middle, right; // false is off, true is on
+    float goFasterSpeed = 30, goSpeed = 20, slowSpeed = 12;
 
-        float forward_speed = 30;
-        float backward_speed = -20;
-        float turn_speed = 20;
+    while (true) {
+        left = left_opto.Value() > SENSOR_THRESHOLD;
+        middle = middle_opto.Value() > SENSOR_THRESHOLD;
+        right = right_opto.Value() > SENSOR_THRESHOLD;
 
-        if (startit) {
-            if (!back_left) 
-            {
-                start = true;
-                startit = false;
-            }
+        if (left && middle && !right) {
+            // right is off, turn left
+            left_motor.SetPercent(goSpeed);
+            right_motor.SetPercent(goFasterSpeed);
+        }   
+        if (left && !middle && !right) {
+            // middle and right are off, turn left
+            left_motor.SetPercent(slowSpeed);
+            right_motor.SetPercent(goFasterSpeed);
         }
-
-        if (start) 
-        {
-            left_motor.SetPercent(forward_speed);
-            right_motor.SetPercent(forward_speed);
-
-            if (!front_right && !front_left)
-            {
-                start = false;
-                second = true;
-            }
+        if (!left && middle && right) {
+            // left is off, turn right
+            left_motor.SetPercent(goFasterSpeed);
+            right_motor.SetPercent(goSpeed);
         }
-
-        else if (second) 
-        {
-            left_motor.SetPercent(backward_speed);
-            right_motor.SetPercent(backward_speed);
-            Sleep(1.5);
-
-            left_motor.SetPercent(-(turn_speed));
-            right_motor.SetPercent(turn_speed);
-            Sleep(1.8);
-            
-            second = false;
-            third = true;
+        if (!left && !middle && right) {
+            // left and middle are off, turn right
+            left_motor.SetPercent(goFasterSpeed);
+            right_motor.SetPercent(slowSpeed);
         }
-
-        else if (third)
-        {
-            left_motor.SetPercent(backward_speed);
-            right_motor.SetPercent(backward_speed);
-
-            if (!back_left && !back_right)
-            {
-                third = false;
-                fourth = true;
-            }
+        if (!left && middle && !right) {
+            // left and right are off, go straight
+            left_motor.SetPercent(goSpeed);
+            right_motor.SetPercent(goSpeed);
         }
-
-        else if (fourth)
-        {
-            left_motor.SetPercent(forward_speed);
-            right_motor.SetPercent(forward_speed);
-
-            if (!front_right && !front_left)
-            {
-                fourth = false;
-                fifth = true;
-            }
-        }
-
-        else if (fifth)
-        {
-            left_motor.SetPercent(backward_speed);
-            right_motor.SetPercent(backward_speed);
-            Sleep(1.0);
-
-            left_motor.SetPercent(turn_speed);
-            right_motor.SetPercent(-(turn_speed));
-            Sleep(1.8);
-
-            fifth = false;
-            sixth = true;
-        }
-
-        else if (sixth) 
-        {
-            left_motor.SetPercent(backward_speed);
-            right_motor.SetPercent(backward_speed);
-
-            if (!back_left && !back_right)
-            {
-                sixth = false;
-                seventh = true;
-            }
-        }
-
-        else if (seventh) 
-        {
-            left_motor.SetPercent(forward_speed);
-            right_motor.SetPercent(forward_speed);
-
-            if (!back_left && !back_right) {
-                left_motor.Stop();
-                right_motor.Stop();
-            }
+        if (!left && !middle && !right) {
+            // all are off: stop
+            left_motor.SetPercent(0);
+            right_motor.SetPercent(0);
         }
     }
 }
