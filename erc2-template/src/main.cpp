@@ -25,7 +25,7 @@ DigitalEncoder left_encoder(FEHIO::Pin15);
 #define IGWAN_TRANASITIONS 318.
 
 #define GO_SPEED 20
-#define BACK_SPEED 20
+#define BACK_SPEED -20
 
 void ERCMain()
 {
@@ -94,11 +94,11 @@ void goForwardOrBackward(bool forward, float distance) {
 
 // Turns certain degrees clockwise or counter-clockwise
 void turnAngle(int degrees, bool CW) {
-    // transform arc length to linear distance
+    // convert degrees to arc length
     float theta = degrees * (PI/180.);
     float distance = ROBOT_RADIUS*theta;
     int countsLimit = (distance*IGWAN_TRANASITIONS)/(2*PI*WHEEL_RADIUS);
-    // go linear distance opposite direction for wheels
+    // move that distance in opposite wheel directions
     if (CW) {
         left_motor.SetPercent(GO_SPEED);
         right_motor.SetPercent(BACK_SPEED);
