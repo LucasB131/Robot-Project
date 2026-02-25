@@ -22,7 +22,7 @@ DigitalEncoder left_encoder(FEHIO::Pin15);
 
 #define WHEEL_RADIUS 1.0 // tbd
 #define ROBOT_RADIUS 1.0 // tbd
-#define IGWAN_TRANASITIONS 318.
+#define IGWAN_TRANSITIONS 318.
 
 #define GO_SPEED 20
 #define BACK_SPEED -20
@@ -32,11 +32,10 @@ void ERCMain()
     TestGUI();
 }
 
-// Follows the line
-// (to change?): until all three sensors are off
+// Follows the line until all three sensors are on
 void followLine() {
     bool left, middle, right; // false is off, true is on
-    float goFasterSpeed = 30, goSpeed = 20, slowSpeed = 12;
+    float goFasterSpeed = 40, goSpeed = 20, slowSpeed = 12;
 
     while (true) {
         left = left_opto.Value() > SENSOR_THRESHOLD;
@@ -69,7 +68,13 @@ void followLine() {
             right_motor.SetPercent(goSpeed);
         }
         if (!left && !middle && !right) {
-            // all are off: stop
+            // all are off: error
+            // unsure if this condition is necessary to code
+            left_motor.SetPercent(0);
+            right_motor.SetPercent(0);
+        }
+        if (left && middle && right) {
+            // all on: success and finish
             left_motor.SetPercent(0);
             right_motor.SetPercent(0);
         }
@@ -79,7 +84,7 @@ void followLine() {
 // Goes forward or backward an exact distance
 void goForwardOrBackward(bool forward, float distance) {
     // s = 2(pi)rn/N // n = sN/2(pi)r
-    int countsLimit = (distance*IGWAN_TRANASITIONS)/(2*PI*WHEEL_RADIUS);
+    int countsLimit = (distance*IGWAN_TRANSITIONS)/(2*PI*WHEEL_RADIUS);
     if (forward) {
         left_motor.SetPercent(GO_SPEED);
         right_motor.SetPercent(GO_SPEED);
@@ -97,7 +102,7 @@ void turnAngle(int degrees, bool CW) {
     // convert degrees to arc length
     float theta = degrees * (PI/180.);
     float distance = ROBOT_RADIUS*theta;
-    int countsLimit = (distance*IGWAN_TRANASITIONS)/(2*PI*WHEEL_RADIUS);
+    int countsLimit = (distance*IGWAN_TRANSITIONS)/(2*PI*WHEEL_RADIUS);
     // move that distance in opposite wheel directions
     if (CW) {
         left_motor.SetPercent(GO_SPEED);
