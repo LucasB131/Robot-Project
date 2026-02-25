@@ -21,6 +21,7 @@ DigitalEncoder left_encoder(FEHIO::Pin15);
 #define SENSOR_THRESHOLD 2.5
 
 #define WHEEL_RADIUS 1.0 // tbd
+#define ROBOT_RADIUS 1.0 // tbd
 #define IGWAN_TRANASITIONS 318.
 
 void ERCMain()
@@ -72,13 +73,23 @@ void followLine() {
     }
 }
 
-// Goes forward an exact distance
-void goForward(float distance) {
+// Goes forward or backward an exact distance
+void goForwardOrBackward(bool forward, float distance) {
     // s = 2(pi)rn/N // n = sN/2(pi)r
     int countsLimit = (distance*IGWAN_TRANASITIONS)/(2*PI*WHEEL_RADIUS);
-    right_encoder.ResetCounts();
-    left_encoder.ResetCounts();
+    if (forward) {
+        left_motor.SetPercent(20);
+        right_motor.SetPercent(20);
+    } else {
+        left_motor.SetPercent(-20);
+        right_motor.SetPercent(-20);
+    }
     while(((left_encoder.Counts() + right_encoder.Counts()) / 2.) < countsLimit);
     right_encoder.ResetCounts();
     left_encoder.ResetCounts();
+}
+
+// Turns certain degrees clockwise
+void turnCWAngle(int degrees) {
+
 }
