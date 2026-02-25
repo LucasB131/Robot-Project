@@ -13,8 +13,15 @@ AnalogInputPin right_opto(FEHIO::Pin11);
 AnalogInputPin middle_opto(FEHIO::Pin12);
 AnalogInputPin left_opto(FEHIO::Pin13);
 
+DigitalEncoder right_encoder(FEHIO::Pin14);
+DigitalEncoder left_encoder(FEHIO::Pin15);
+
 // Global Constants
+#define PI 3.141592653
 #define SENSOR_THRESHOLD 2.5
+
+#define WHEEL_RADIUS 1.0 // tbd
+#define IGWAN_TRANASITIONS 318.
 
 void ERCMain()
 {
@@ -63,4 +70,15 @@ void followLine() {
             right_motor.SetPercent(0);
         }
     }
+}
+
+// Goes forward an exact distance
+void goForward(float distance) {
+    // s = 2(pi)rn/N // n = sN/2(pi)r
+    int countsLimit = (distance*IGWAN_TRANASITIONS)/(2*PI*WHEEL_RADIUS);
+    right_encoder.ResetCounts();
+    left_encoder.ResetCounts();
+    while(((left_encoder.Counts() + right_encoder.Counts()) / 2.) < countsLimit);
+    right_encoder.ResetCounts();
+    left_encoder.ResetCounts();
 }
