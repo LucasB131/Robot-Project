@@ -82,7 +82,7 @@ void followLine() {
 }
 
 // Goes forward or backward an exact distance
-void goForwardOrBackward(bool forward, float distance) {
+void goDistance(bool forward, float distance) {
     // s = 2(pi)rn/N // n = sN/2(pi)r
     int countsLimit = (distance*IGWAN_TRANSITIONS)/(2*PI*WHEEL_RADIUS);
     if (forward) {
@@ -98,7 +98,7 @@ void goForwardOrBackward(bool forward, float distance) {
 }
 
 // Turns certain degrees clockwise or counter-clockwise
-void turnAngle(int degrees, bool CW) {
+void turnAngle(bool CW, int degrees) {
     // convert degrees to arc length
     float theta = degrees * (PI/180.);
     float distance = ROBOT_RADIUS*theta;
