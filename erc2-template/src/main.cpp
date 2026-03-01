@@ -93,6 +93,8 @@ void goDistance(bool forward, float distance) {
         right_motor.SetPercent(BACK_SPEED);
     }
     while(((left_encoder.Counts() + right_encoder.Counts()) / 2.) < countsLimit);
+    left_motor.SetPercent(0);
+    right_motor.SetPercent(0);
     right_encoder.ResetCounts();
     left_encoder.ResetCounts();
 }
@@ -112,6 +114,8 @@ void turnAngle(bool CW, int degrees) {
         right_motor.SetPercent(GO_SPEED);
     }
     while(((left_encoder.Counts() + right_encoder.Counts()) / 2.) < countsLimit);
+    left_motor.SetPercent(0);
+    right_motor.SetPercent(0);
     right_encoder.ResetCounts();
     left_encoder.ResetCounts();
 }
