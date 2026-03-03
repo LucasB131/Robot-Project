@@ -20,8 +20,8 @@ DigitalEncoder left_encoder(FEHIO::Pin15);
 #define PI 3.141592653
 #define SENSOR_THRESHOLD 2.5
 
-#define WHEEL_RADIUS 1.0 // tbd
-#define ROBOT_RADIUS 1.0 // tbd
+#define WHEEL_RADIUS 1.25 // inches
+#define ROBOT_RADIUS 8.0 // inches
 #define IGWAN_TRANSITIONS 318.
 
 #define GO_SPEED 20
@@ -29,7 +29,11 @@ DigitalEncoder left_encoder(FEHIO::Pin15);
 
 void ERCMain()
 {
-    TestGUI();
+    goDistance(true, 33.0);
+    goDistance(false, 30.0);
+    turnAngle(true, 90);
+    goDistance(true, 25.0);
+    goDistance(false, 25.0);
 }
 
 // Follows the line until all three sensors are on
