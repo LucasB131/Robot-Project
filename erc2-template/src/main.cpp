@@ -29,12 +29,16 @@ DigitalEncoder left_encoder(FEHIO::Pin14);
 #define ROBOT_RADIUS 8.10/2.0 // inches
 #define IGWAN_TRANSITIONS 318.
 
-#define GO_SPEED 40
-#define BACK_SPEED -40
+#define GO_SPEED_RIGHT 40
+#define GO_SPEED_LEFT 38
+#define BACK_SPEED_RIGHT -40
+#define BACK_SPEED_LEFT -38
 
 void ERCMain()
 {
-
+    goDistance(true,30.0);
+    Sleep(15.0);
+    goDistance(false, 30.0);
 }
 
 // Follows the line until all three sensors are on
@@ -91,11 +95,11 @@ void goDistance(bool forward, float distance) {
     // s = 2(pi)rn/N // n = sN/2(pi)r
     int countsLimit = (distance*IGWAN_TRANSITIONS)/(2*PI*WHEEL_RADIUS);
     if (forward) {
-        left_motor.SetPercent(GO_SPEED);
-        right_motor.SetPercent(GO_SPEED);
+        left_motor.SetPercent(GO_SPEED_LEFT);
+        right_motor.SetPercent(GO_SPEED_RIGHT);
     } else {
-        left_motor.SetPercent(BACK_SPEED);
-        right_motor.SetPercent(BACK_SPEED);
+        left_motor.SetPercent(BACK_SPEED_LEFT);
+        right_motor.SetPercent(BACK_SPEED_RIGHT);
     }
     while(((left_encoder.Counts() + right_encoder.Counts()) / 2.) < countsLimit);
     left_motor.SetPercent(0);
@@ -112,11 +116,11 @@ void turnAngle(bool CW, int degrees) {
     int countsLimit = (distance*IGWAN_TRANSITIONS)/(2*PI*WHEEL_RADIUS);
     // move that distance in opposite wheel directions
     if (CW) {
-        left_motor.SetPercent(GO_SPEED);
-        right_motor.SetPercent(BACK_SPEED);
+        left_motor.SetPercent(GO_SPEED_LEFT);
+        right_motor.SetPercent(BACK_SPEED_RIGHT);
     } else {
-        left_motor.SetPercent(BACK_SPEED);
-        right_motor.SetPercent(GO_SPEED);
+        left_motor.SetPercent(BACK_SPEED_LEFT);
+        right_motor.SetPercent(GO_SPEED_RIGHT);
     }
     while(((left_encoder.Counts() + right_encoder.Counts()) / 2.) < countsLimit);
     left_motor.SetPercent(0);
