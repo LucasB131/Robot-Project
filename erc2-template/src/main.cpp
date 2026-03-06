@@ -5,35 +5,36 @@
 #include <FEHUtility.h>
 #include <Arduino.h>
 
+// function declarations
+void followLine();
+void goDistance(bool forward, float distance);
+void turnAngle(bool CW, int degrees);
+
 // exact pin locations to change
-FEHMotor left_motor(FEHMotor::Motor1, 9.0);
+FEHMotor left_motor(FEHMotor::Motor2, 9.0);
 FEHMotor right_motor(FEHMotor::Motor0, 9.0);
 
 AnalogInputPin right_opto(FEHIO::Pin11);
 AnalogInputPin middle_opto(FEHIO::Pin12);
 AnalogInputPin left_opto(FEHIO::Pin13);
 
-DigitalEncoder right_encoder(FEHIO::Pin14);
-DigitalEncoder left_encoder(FEHIO::Pin15);
+DigitalEncoder right_encoder(FEHIO::Pin12);
+DigitalEncoder left_encoder(FEHIO::Pin14);
 
 // Global Constants
 #define PI 3.141592653
 #define SENSOR_THRESHOLD 2.5
 
 #define WHEEL_RADIUS 1.25 // inches
-#define ROBOT_RADIUS 8.0 // inches
+#define ROBOT_RADIUS 8.10/2.0 // inches
 #define IGWAN_TRANSITIONS 318.
 
-#define GO_SPEED 20
-#define BACK_SPEED -20
+#define GO_SPEED 40
+#define BACK_SPEED -40
 
 void ERCMain()
 {
-    goDistance(true, 33.0);
-    goDistance(false, 30.0);
-    turnAngle(true, 90);
-    goDistance(true, 25.0);
-    goDistance(false, 25.0);
+
 }
 
 // Follows the line until all three sensors are on
