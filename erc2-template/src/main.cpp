@@ -47,7 +47,7 @@ void ERCMain() {
 }
 
 
-void Milestone3()
+void Milestone2()
 {
     // Wait for CDS value to read start light activation
     while (cds.Value() > STARTLIGHT_THRESHOLD) {};
@@ -76,9 +76,15 @@ void Milestone3()
     
     // Hit button according to which light turned on
     if (red) {
-        // turn and go to hit red
+        // turn and go to hit red on right
+        turnAngle(true, 90);
+        goDistance(true, 3.0);
+        turnAngle(false, 90);
     } else {
-        // turn and go to hit blue
+        // turn and go to hit blue on left
+        turnAngle(false, 90);
+        goDistance(true, 3.0);
+        turnAngle(false, 90);
     }
 }
 
@@ -87,7 +93,8 @@ void followLine() {
     bool left, middle, right; // false is off, true is on
     float goFasterSpeed = 40, goSpeed = 20, slowSpeed = 12;
 
-    while (true) {
+    bool reached = false;
+    while (!reached) {
         left = left_opto.Value() > SENSOR_THRESHOLD;
         middle = middle_opto.Value() > SENSOR_THRESHOLD;
         right = right_opto.Value() > SENSOR_THRESHOLD;
@@ -127,6 +134,7 @@ void followLine() {
             // all on: success and finish
             left_motor.SetPercent(0);
             right_motor.SetPercent(0);
+            reached = true;
         }
     }
 }
