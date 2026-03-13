@@ -40,7 +40,7 @@ DigitalEncoder left_encoder(FEHIO::Pin10);
 
 #define OPTO_THRESHOLD 4.2
 #define STARTLIGHT_THRESHOLD 2.5
-#define RED_THRESHOLD 2.0
+#define RED_THRESHOLD 0.9
 
 void ERCMain() {
     Milestone2();
@@ -55,23 +55,23 @@ void Milestone2()
     // Go into and out of the button (figure out exact distances)
     goDistance(false, 3.0);
     Sleep(0.2);
-    goDistance(true, 3.0);
+    goDistance(true, 4.0);
     Sleep(0.2);
 
     // Turn x degrees to face the line up the ramp (figure out exact angle to turn)
-    turnAngle(true, 52);
+    turnAngle(true, 50);
     Sleep(0.2);
 
     // Go x distance to reach the line
-    goDistance(true, 28.0);
+    goDistance(true, 31.0);
     Sleep(0.2);
 
     // Follow the line to the humidifer buttons
-    followLine(6.5);
+    followLine(5.0);
     turnAngle(false, 15);
 
     // Move a little forward x inches to read the CDS cell
-    goDistance(true, 8.0);
+    goDistance(true, 7.0);
     Sleep(0.2);
 
     // Read CDS cell (consider getting the red filter) (no filter: blue ~0.25 red ~0.99)
@@ -79,23 +79,41 @@ void Milestone2()
     
     // Hit button according to which light turned on
     if (red) {
+        LCD.Write("red");
         // turn and go to hit red on right
         turnAngle(true, 90);
         Sleep(0.2);
-        goDistance(true, 6.0);
+        goDistance(true, 3.0);
         Sleep(0.2);
         turnAngle(false, 90);
         Sleep(0.2);
+
+        goDistance(true, 7.0);
+
+        // back into wall
+        goDistance(false, 33.0);
+        goDistance(true, 3.5);
+        turnAngle(false, 90);
+        goDistance(true, 42.0);
+        right_motor.SetPercent(20);
     } else {
+        LCD.Write("blue");
         // turn and go to hit blue on left
         turnAngle(false, 90);
         Sleep(0.2);
-        goDistance(true, 6.0);
+        goDistance(true, 3.0);
         Sleep(0.2);
         turnAngle(true, 90);
         Sleep(0.2);
+        goDistance(true, 7.0);
+
+        // back into wall
+        goDistance(false, 33.0);
+        goDistance(true, 2.0);
+        turnAngle(false, 90);
+        goDistance(true, 42.0);
+        right_motor.SetPercent(20);
     }
-    goDistance(true, 7.0);
 }
 
 // Follows the line until all three sensors are on
