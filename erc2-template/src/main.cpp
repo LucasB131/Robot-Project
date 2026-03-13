@@ -8,42 +8,42 @@
 #include <FEHMotor.h>
 
 // function declarations
-void followLine();
+void followLine(double secs);
 void goDistance(bool forward, float distance);
 void turnAngle(bool CW, int degrees);
+void Milestone2();
 
 // exact pin locations to change
 FEHMotor left_motor(FEHMotor::Motor2, 9.0);
-FEHMotor right_motor(FEHMotor::Motor0, 9.0);
+FEHMotor right_motor(FEHMotor::Motor1, 9.0);
 
-AnalogInputPin cds(FEHIO::Pin0);
+AnalogInputPin cds(FEHIO::Pin8);
 
-AnalogInputPin right_opto(FEHIO::Pin11);
-AnalogInputPin middle_opto(FEHIO::Pin12);
-AnalogInputPin left_opto(FEHIO::Pin13);
+AnalogInputPin right_opto(FEHIO::Pin12);
+AnalogInputPin middle_opto(FEHIO::Pin13);
+AnalogInputPin left_opto(FEHIO::Pin14);
 
-DigitalEncoder right_encoder(FEHIO::Pin12);
-DigitalEncoder left_encoder(FEHIO::Pin14);
+DigitalEncoder right_encoder(FEHIO::Pin9);
+DigitalEncoder left_encoder(FEHIO::Pin10);
 
 // Global Constants
 #define PI 3.141592653
-#define SENSOR_THRESHOLD 2.5
 
 #define WHEEL_RADIUS 1.25 // inches
 #define ROBOT_RADIUS 8.10/2.0 // inches
 #define IGWAN_TRANSITIONS 318.
 
-#define GO_SPEED_RIGHT 40
-#define GO_SPEED_LEFT 40
-#define BACK_SPEED_RIGHT -40
-#define BACK_SPEED_LEFT -40
+#define GO_SPEED_RIGHT 35
+#define GO_SPEED_LEFT 35
+#define BACK_SPEED_RIGHT -35
+#define BACK_SPEED_LEFT -35
 
-#define STARTLIGHT_THRESHOLD 3.0
-#define RED_THRESHOLD 0.6
+#define OPTO_THRESHOLD 4.2
+#define STARTLIGHT_THRESHOLD 2.5
+#define RED_THRESHOLD 2.0
 
 void ERCMain() {
-    right_motor.SetPercent(GO_SPEED_RIGHT);
-    left_motor.SetPercent(GO_SPEED_LEFT);
+    Milestone2();
 }
 
 
@@ -53,51 +53,64 @@ void Milestone2()
     while (cds.Value() > STARTLIGHT_THRESHOLD) {};
 
     // Go into and out of the button (figure out exact distances)
-    goDistance(true, 4.0);
-    goDistance(false, 4.0);
+    goDistance(false, 3.0);
+    Sleep(0.2);
+    goDistance(true, 3.0);
+    Sleep(0.2);
 
     // Turn x degrees to face the line up the ramp (figure out exact angle to turn)
-    turnAngle(false, 135);
+    turnAngle(true, 52);
+    Sleep(0.2);
 
     // Go x distance to reach the line
-    goDistance(true, 30.0);
+    goDistance(true, 28.0);
+    Sleep(0.2);
 
     // Follow the line to the humidifer buttons
-    followLine();
+    followLine(6.5);
+    turnAngle(false, 15);
 
     // Move a little forward x inches to read the CDS cell
-    goDistance(true, 4.0);
+    goDistance(true, 8.0);
+    Sleep(0.2);
 
     // Read CDS cell (consider getting the red filter) (no filter: blue ~0.25 red ~0.99)
-    bool red = false;
-    if (cds.Value() < RED_THRESHOLD) {
-        bool red = true;
-    }
+    bool red = cds.Value() < RED_THRESHOLD;
     
     // Hit button according to which light turned on
     if (red) {
         // turn and go to hit red on right
         turnAngle(true, 90);
-        goDistance(true, 3.0);
+        Sleep(0.2);
+        goDistance(true, 6.0);
+        Sleep(0.2);
         turnAngle(false, 90);
+        Sleep(0.2);
     } else {
         // turn and go to hit blue on left
         turnAngle(false, 90);
-        goDistance(true, 3.0);
-        turnAngle(false, 90);
+        Sleep(0.2);
+        goDistance(true, 6.0);
+        Sleep(0.2);
+        turnAngle(true, 90);
+        Sleep(0.2);
     }
+    goDistance(true, 7.0);
 }
 
 // Follows the line until all three sensors are on
-void followLine() {
-    bool left, middle, right; // false is off, true is on
-    float goFasterSpeed = 40, goSpeed = 20, slowSpeed = 12;
+void followLine(double secs) {
+    bool left, middle, right, lastLeft; // false is off, true is on
+    float goFasterSpeed = 20, goSpeed = 10, slowSpeed = -20;
+    double initialTime = TimeNow(), elapsedTime;
 
     bool reached = false;
     while (!reached) {
-        left = left_opto.Value() > SENSOR_THRESHOLD;
-        middle = middle_opto.Value() > SENSOR_THRESHOLD;
-        right = right_opto.Value() > SENSOR_THRESHOLD;
+        left = left_opto.Value() > OPTO_THRESHOLD;
+        middle = middle_opto.Value() > OPTO_THRESHOLD;
+        right = right_opto.Value() > OPTO_THRESHOLD;
+
+        elapsedTime = TimeNow() - initialTime;
 
         if (left && middle && !right) {
             // right is off, turn left
@@ -108,6 +121,7 @@ void followLine() {
             // middle and right are off, turn left
             left_motor.SetPercent(slowSpeed);
             right_motor.SetPercent(goFasterSpeed);
+            lastLeft = true;
         }
         if (!left && middle && right) {
             // left is off, turn right
@@ -118,6 +132,7 @@ void followLine() {
             // left and middle are off, turn right
             left_motor.SetPercent(goFasterSpeed);
             right_motor.SetPercent(slowSpeed);
+            lastLeft = false;
         }
         if (!left && middle && !right) {
             // left and right are off, go straight
@@ -126,11 +141,15 @@ void followLine() {
         }
         if (!left && !middle && !right) {
             // all are off: error
-            // unsure if this condition is necessary to code
-            left_motor.SetPercent(0);
-            right_motor.SetPercent(0);
+            if (lastLeft) {
+                left_motor.SetPercent(slowSpeed);
+                right_motor.SetPercent(goFasterSpeed);
+            } else {
+                right_motor.SetPercent(slowSpeed);
+                left_motor.SetPercent(goFasterSpeed);
+            }
         }
-        if (left && middle && right) {
+        if (left && middle && right && (elapsedTime > secs)) {
             // all on: success and finish
             left_motor.SetPercent(0);
             right_motor.SetPercent(0);
