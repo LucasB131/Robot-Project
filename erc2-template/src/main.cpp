@@ -12,10 +12,14 @@ void followLine(double secs);
 void goDistance(bool forward, float distance);
 void turnAngle(bool CW, int degrees);
 void Milestone2();
+void Milestone3();
 
 // exact pin locations to change
 FEHMotor left_motor(FEHMotor::Motor2, 9.0);
 FEHMotor right_motor(FEHMotor::Motor1, 9.0);
+
+FEHServo vertical(FEHServo::Servo1);
+FEHServo horizontal(FEHServo::Servo0);
 
 AnalogInputPin cds(FEHIO::Pin8);
 
@@ -43,9 +47,45 @@ DigitalEncoder left_encoder(FEHIO::Pin10);
 #define RED_THRESHOLD 0.9
 
 void ERCMain() {
-    Milestone2();
+    Milestone3();
 }
 
+void Milestone3() 
+{
+    // Wait for CDS value to read start light activation
+    while (cds.Value() > STARTLIGHT_THRESHOLD) {};
+
+    vertical.SetDegree(20);
+    horizontal.SetDegree(180);
+    // Go into and out of the button (figure out exact distances)
+    goDistance(false, 3.0);
+    Sleep(0.2);
+    goDistance(true, 4.0);
+    Sleep(0.2);
+
+    // Turn x degrees to face the line up the ramp (figure out exact angle to turn)
+    turnAngle(true, 55);
+    Sleep(0.2);
+
+    // gg
+    goDistance(true, 34.0);
+    Sleep(0.2);
+    
+    // turn parallel to window
+    turnAngle(false, 90);
+
+    // go
+    goDistance(true, 13.5);
+
+    // arm wrap around
+    goDistance(false, 11.0);
+    horizontal.SetDegree(0);
+    goDistance(true, 11.0);
+    horizontal.SetDegree(180);
+    
+    // bo back ground
+    goDistance(false, 20.0);
+}
 
 void Milestone2()
 {
