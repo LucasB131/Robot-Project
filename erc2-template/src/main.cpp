@@ -63,18 +63,14 @@ void Milestone3()
     goDistance(true, 4.0);
     Sleep(0.2);
 
-    // Turn x degrees to face the line up the ramp (figure out exact angle to turn)
+    // Turn x degrees to face the line up the ramp (figure out exact angle to turn) and go
     turnAngle(true, 55);
     Sleep(0.2);
-
-    // gg
     goDistance(true, 34.0);
     Sleep(0.2);
     
-    // turn parallel to window
+    // turn parallel to window and go
     turnAngle(false, 90);
-
-    // go
     goDistance(true, 13.5);
 
     // arm wrap around
@@ -83,7 +79,7 @@ void Milestone3()
     goDistance(true, 11.0);
     horizontal.SetDegree(180);
     
-    // bo back ground
+    // pull window closed
     goDistance(false, 20.0);
 }
 
@@ -156,7 +152,7 @@ void Milestone2()
     }
 }
 
-// Follows the line until all three sensors are on
+// Follows the line until all three sensors are on and until x seconds have passed
 void followLine(double secs) {
     bool left, middle, right, lastLeft; // false is off, true is on
     float goFasterSpeed = 20, goSpeed = 10, slowSpeed = -20;
