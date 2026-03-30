@@ -1,1 +1,0 @@
-This is not part of the official PlatformIO directory structure. This just exists so we can have a local, modified copy of ArduinoCore-avr. 
