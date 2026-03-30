@@ -33,15 +33,6 @@ DigitalEncoder left_encoder(FEHIO::Pin10);
 // Global Constants
 #define PI 3.141592653
 
-#define RCS_WAIT_TIME_IN_SEC 0.35
-
-#define PULSE_TIME 0.1
-#define PULSE_POWER 50
-
-// Orientation of AruCo Code
-#define PLUS 0
-#define MINUS 1
-
 #define WHEEL_RADIUS 1.25 // inches
 #define ROBOT_RADIUS 8.10/2.0 // inches
 #define IGWAN_TRANSITIONS 318.
@@ -260,8 +251,18 @@ void turnAngle(bool CW, int degrees) {
     left_encoder.ResetCounts();
 }
 
-
+/* * * * * * * * */
 /* RCS Functions */
+/* * * * * * * * */
+
+// RCS Pulse Values
+#define RCS_WAIT_TIME_IN_SEC 0.35
+#define PULSE_TIME 0.1
+#define PULSE_POWER 50
+
+// Orientation of AruCo Code
+#define PLUS 0
+#define MINUS 1
 
 /*
  * Pulse forward or backward a short distance using time
@@ -298,6 +299,13 @@ void pulse_rotation(bool cw, float seconds)
         right_motor.SetPercent(GO_SPEED_RIGHT);
         left_motor.SetPercent(BACK_SPEED_LEFT);
     }
+
+    // Wait for the correct number of seconds
+    Sleep(seconds);
+
+    // Turn off motors
+    right_motor.Stop();
+    left_motor.Stop();
 }
 
 /* 
@@ -336,18 +344,15 @@ void check_y(float y_coordinate, int orientation)
 {
     RCSPose* pose = RCS.RequestPosition();
 
-    // Check if receiving proper RCS coordinates and whether the robot is within an acceptable range
     for (int i = 0; i < 10; i++) {
         while(pose->y >= 0 && (pose->y < y_coordinate - 1 || pose->y > y_coordinate + 1))
         {
             if(pose->y > y_coordinate + 1)
             {
-                // Pulse the motors for a short duration in the correct direction
                 pulse_forward(false, PULSE_TIME);
             }
             else if(pose->y < y_coordinate - 1)
             {
-                // Pulse the motors for a short duration in the correct direction
                 pulse_forward(true, PULSE_TIME);
             }
             Sleep(RCS_WAIT_TIME_IN_SEC);
@@ -363,14 +368,21 @@ void check_y(float y_coordinate, int orientation)
 void check_heading(float heading)
 {
     RCSPose* pose = RCS.RequestPosition();
-    //You will need to fill out this one yourself and take into account
-    //checking for proper RCS data and the edge conditions
-    //(when you want the robot to go to 0 degrees or close to 0 degrees)
 
-    /*
-        SUGGESTED ALGORITHM:
-        1. Check the current orientation of the QR code and the desired orientation of the QR code
-        2. Check if the robot is within the desired threshold for the heading based on the orientation
-        3. Pulse in the correct direction based on the orientation
-    */
+    for (int i = 0; i < 10; i++) {
+        while(pose->heading >= heading + 1 || pose->heading > heading - 1)
+        {
+            if(pose->heading > heading + 1)
+            {
+                pulse_rotation(true, PULSE_TIME);
+            }
+            else if(pose->heading < heading - 1)
+            {
+                pulse_forward(false, PULSE_TIME);
+            }
+            Sleep(RCS_WAIT_TIME_IN_SEC);
+            
+            pose = RCS.RequestPosition();
+        }
+    }   
 }
