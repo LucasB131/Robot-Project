@@ -264,13 +264,18 @@ void turnAngle(bool CW, int degrees) {
 /* RCS Functions */
 
 /*
- * Pulse forward a short distance using time
+ * Pulse forward or backward a short distance using time
  */
-void pulse_forward(int percent, float seconds) 
+void pulse_forward(bool forward, float seconds) 
 {
     // Set both motors to desired percent
-    right_motor.SetPercent(percent);
-    left_motor.SetPercent(percent);
+    if (forward) {
+        right_motor.SetPercent(GO_SPEED_RIGHT);
+        left_motor.SetPercent(GO_SPEED_LEFT);
+    } else {
+        right_motor.SetPercent(GO_SPEED_RIGHT);
+        left_motor.SetPercent(GO_SPEED_LEFT);
+    }
 
     // Wait for the correct number of seconds
     Sleep(seconds);
@@ -280,17 +285,26 @@ void pulse_forward(int percent, float seconds)
     left_motor.Stop();
 }
 
+/*
+ * Pulse a short rotation using time
+ */
+void pulse_rotation(bool cw, float seconds)
+{
+    // Set both motors to desired percent
+    if (cw) {
+        right_motor.SetPercent(BACK_SPEED_RIGHT);
+        left_motor.SetPercent(GO_SPEED_LEFT);
+    } else {
+        right_motor.SetPercent(GO_SPEED_RIGHT);
+        left_motor.SetPercent(BACK_SPEED_LEFT);
+    }
+}
+
 /* 
  * Use RCS to move to the desired x_coordinate based on the orientation of the AruCo code
  */
 void check_x(float x_coordinate, int orientation)
 {
-    // Determine the direction of the motors based on the orientation of the AruCo code 
-    int power = PULSE_POWER;
-    if(orientation == MINUS){
-        power = -PULSE_POWER;
-    }
-
     RCSPose* pose = RCS.RequestPosition();
 
     // Check if receiving proper RCS coordinates and whether the robot is within an acceptable range
@@ -300,12 +314,12 @@ void check_x(float x_coordinate, int orientation)
             if (pose->x > x_coordinate + 1)
             {
                 // Pulse the motors for a short duration in the correct direction
-                pulse_forward(-power, PULSE_TIME);
+                pulse_forward(false, PULSE_TIME);
             }
             else if(pose->x < x_coordinate - 1)
             {
                 // Pulse the motors for a short duration in the correct direction
-                pulse_forward(power, PULSE_TIME);
+                pulse_forward(true, PULSE_TIME);
             }
             Sleep(RCS_WAIT_TIME_IN_SEC);
 
@@ -320,12 +334,6 @@ void check_x(float x_coordinate, int orientation)
  */
 void check_y(float y_coordinate, int orientation)
 {
-    // Determine the direction of the motors based on the orientation of the QR code
-    int power = PULSE_POWER;
-    if(orientation == MINUS){
-        power = -PULSE_POWER;
-    }
-
     RCSPose* pose = RCS.RequestPosition();
 
     // Check if receiving proper RCS coordinates and whether the robot is within an acceptable range
@@ -335,12 +343,12 @@ void check_y(float y_coordinate, int orientation)
             if(pose->y > y_coordinate + 1)
             {
                 // Pulse the motors for a short duration in the correct direction
-                pulse_forward(-power, PULSE_TIME);
+                pulse_forward(false, PULSE_TIME);
             }
             else if(pose->y < y_coordinate - 1)
             {
                 // Pulse the motors for a short duration in the correct direction
-            pulse_forward(power, PULSE_TIME);
+                pulse_forward(true, PULSE_TIME);
             }
             Sleep(RCS_WAIT_TIME_IN_SEC);
             
@@ -354,6 +362,7 @@ void check_y(float y_coordinate, int orientation)
  */
 void check_heading(float heading)
 {
+    RCSPose* pose = RCS.RequestPosition();
     //You will need to fill out this one yourself and take into account
     //checking for proper RCS data and the edge conditions
     //(when you want the robot to go to 0 degrees or close to 0 degrees)
