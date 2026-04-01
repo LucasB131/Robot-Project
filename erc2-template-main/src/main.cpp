@@ -8,11 +8,15 @@
 #include <FEHMotor.h>
 
 // function declarations
-void followLine(double secs);
+void followLine(bool stopAtLine, double secs);
 void goDistance(bool forward, float distance);
 void turnAngle(bool CW, int degrees);
+void check_x(float x_coordinate, int orientation);
+void check_y(float y_coordinate, int orientation);
+void check_heading(float heading);
 void Milestone2();
 void Milestone3();
+void Milestone4();
 
 // exact pin locations to change
 FEHMotor left_motor(FEHMotor::Motor2, 9.0);
@@ -47,7 +51,59 @@ DigitalEncoder left_encoder(FEHIO::Pin10);
 #define RED_THRESHOLD 0.9
 
 void ERCMain() {
-    TestGUI();
+    Milestone4();
+}
+
+void Milestone4()
+{
+    // Initialize RCS
+    RCS.InitializeTouchMenu("0300G3QCK");
+
+    // Wait for CDS value to read start light activation
+    while (cds.Value() > STARTLIGHT_THRESHOLD) {};
+
+    // Go into and out of the button (figure out exact distances)
+    goDistance(false, 4.0);
+    Sleep(0.2);
+    goDistance(true, 7.0);
+    Sleep(0.2);
+
+    horizontal.SetDegree(90);
+    vertical.SetDegree(18);
+
+    // Go same y as apple bucket
+    turnAngle(true, 15);
+    float yAppleBucket = 20.27;
+    goDistance(true, 10.0);
+    check_y(yAppleBucket, 0); // 115
+
+    // Turn in line with bucket
+    turnAngle(false, 50);
+    check_heading(180);
+
+    // Go into bucket
+    float xPickupBucket = 12.34;
+    check_x(xPickupBucket, 0); // 180
+
+    // Lift bucket
+    vertical.SetDegree(35);
+
+    // Go up the ramp
+    turnAngle(false, 160);
+    goDistance(true, 30.0);
+    turnAngle(false, 110);
+    goDistance(true, 20.0);
+
+    // follow line to platform
+    followLine(false, 8.0);
+
+    // align with platform
+    float platformHeading = 90;
+    check_heading(platformHeading);
+
+    // drop off bucket
+    vertical.SetDegree(18);
+    goDistance(false, 5.0);
 }
 
 void Milestone3() 
@@ -103,7 +159,7 @@ void Milestone2()
     Sleep(0.2);
 
     // Follow the line to the humidifer buttons
-    followLine(5.0);
+    followLine(true, 5.0);
     turnAngle(false, 15);
 
     // Move a little forward x inches to read the CDS cell
@@ -153,7 +209,7 @@ void Milestone2()
 }
 
 // Follows the line until all three sensors are on and until x seconds have passed
-void followLine(double secs) {
+void followLine(bool stopAtLine, double secs) {
     bool left, middle, right, lastLeft; // false is off, true is on
     float goFasterSpeed = 20, goSpeed = 10, slowSpeed = -20;
     double initialTime = TimeNow(), elapsedTime;
@@ -194,13 +250,21 @@ void followLine(double secs) {
             right_motor.SetPercent(goSpeed);
         }
         if (!left && !middle && !right) {
-            // all are off: error
-            if (lastLeft) {
-                left_motor.SetPercent(slowSpeed);
-                right_motor.SetPercent(goFasterSpeed);
-            } else {
-                right_motor.SetPercent(slowSpeed);
-                left_motor.SetPercent(goFasterSpeed);
+            //  all off: if not stopping at line, finish
+            if (elapsedTime > secs && !stopAtLine) {
+                left_motor.SetPercent(0);
+                right_motor.SetPercent(0);
+                reached = true;
+            }
+            // all are off: turn where it was turning last
+            else {
+                if (lastLeft) {
+                    left_motor.SetPercent(slowSpeed);
+                    right_motor.SetPercent(goFasterSpeed);
+                } else {
+                    right_motor.SetPercent(slowSpeed);
+                    left_motor.SetPercent(goFasterSpeed);
+            }
             }
         }
         if (left && middle && right && (elapsedTime > secs)) {
@@ -274,8 +338,8 @@ void pulse_forward(bool forward, float seconds)
         right_motor.SetPercent(GO_SPEED_RIGHT);
         left_motor.SetPercent(GO_SPEED_LEFT);
     } else {
-        right_motor.SetPercent(GO_SPEED_RIGHT);
-        left_motor.SetPercent(GO_SPEED_LEFT);
+        right_motor.SetPercent(BACK_SPEED_RIGHT);
+        left_motor.SetPercent(BACK_SPEED_LEFT);
     }
 
     // Wait for the correct number of seconds
