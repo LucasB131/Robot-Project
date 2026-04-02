@@ -46,6 +46,10 @@ DigitalEncoder left_encoder(FEHIO::Pin10);
 #define BACK_SPEED_RIGHT -35
 #define BACK_SPEED_LEFT -35
 
+// aruco code orientation constants
+#define PLUS 1
+#define MINUS 0
+
 #define OPTO_THRESHOLD 4.2
 #define STARTLIGHT_THRESHOLD 2.5
 #define RED_THRESHOLD 0.9
@@ -75,15 +79,15 @@ void Milestone4()
     turnAngle(true, 15);
     float yAppleBucket = 20.27;
     goDistance(true, 10.0);
-    check_y(yAppleBucket, 0); // 115
+    check_y(yAppleBucket, MINUS);
 
     // Turn in line with bucket
     turnAngle(false, 50);
-    check_heading(180);
+    check_heading(182);
 
     // Go into bucket
     float xPickupBucket = 12.34;
-    check_x(xPickupBucket, 0); // 180
+    check_x(xPickupBucket, MINUS);
 
     // Lift bucket
     vertical.SetDegree(35);
@@ -324,10 +328,6 @@ void turnAngle(bool CW, int degrees) {
 #define PULSE_TIME 0.1
 #define PULSE_POWER 50
 
-// Orientation of AruCo Code
-#define PLUS 0
-#define MINUS 1
-
 /*
  * Pulse forward or backward a short distance using time
  */
@@ -377,6 +377,12 @@ void pulse_rotation(bool cw, float seconds)
  */
 void check_x(float x_coordinate, int orientation)
 {
+    // represents if AruCo code is facing positive x direction
+    bool positive = true;
+    if (orientation == MINUS) {
+        positive = false;
+    }
+    
     RCSPose* pose = RCS.RequestPosition();
 
     // Check if receiving proper RCS coordinates and whether the robot is within an acceptable range
@@ -386,12 +392,12 @@ void check_x(float x_coordinate, int orientation)
             if (pose->x > x_coordinate + 1)
             {
                 // Pulse the motors for a short duration in the correct direction
-                pulse_forward(false, PULSE_TIME);
+                pulse_forward(!positive, PULSE_TIME);
             }
             else if(pose->x < x_coordinate - 1)
             {
                 // Pulse the motors for a short duration in the correct direction
-                pulse_forward(true, PULSE_TIME);
+                pulse_forward(positive, PULSE_TIME);
             }
             Sleep(RCS_WAIT_TIME_IN_SEC);
 
@@ -406,6 +412,12 @@ void check_x(float x_coordinate, int orientation)
  */
 void check_y(float y_coordinate, int orientation)
 {
+    // represents if AruCo code is facing positive y direction
+    bool positive = true;
+    if (orientation == MINUS) {
+        positive = false;
+    }
+
     RCSPose* pose = RCS.RequestPosition();
 
     for (int i = 0; i < 10; i++) {
@@ -413,11 +425,11 @@ void check_y(float y_coordinate, int orientation)
         {
             if(pose->y > y_coordinate + 1)
             {
-                pulse_forward(false, PULSE_TIME);
+                pulse_forward(!positive, PULSE_TIME);
             }
             else if(pose->y < y_coordinate - 1)
             {
-                pulse_forward(true, PULSE_TIME);
+                pulse_forward(positive, PULSE_TIME);
             }
             Sleep(RCS_WAIT_TIME_IN_SEC);
             
