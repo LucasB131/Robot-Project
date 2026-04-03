@@ -17,6 +17,7 @@ void check_heading(float heading);
 void Milestone2();
 void Milestone3();
 void Milestone4();
+void Milestone4RCS();
 
 // exact pin locations to change
 FEHMotor left_motor(FEHMotor::Motor2, 9.0);
@@ -55,12 +56,18 @@ DigitalEncoder left_encoder(FEHIO::Pin10);
 #define RED_THRESHOLD 0.9
 
 void ERCMain() {
-    Milestone4();
+    Milestone4RCS();
 }
 
 void Milestone4()
 {
+
+}
+
+void Milestone4RCS()
+{ // Course A
     // Initialize RCS
+    RCS.DisableRateLimit();
     RCS.InitializeTouchMenu("0300G3QCK");
 
     // Wait for CDS value to read start light activation
@@ -72,31 +79,36 @@ void Milestone4()
     goDistance(true, 7.0);
     Sleep(0.2);
 
-    horizontal.SetDegree(90);
+    horizontal.SetDegree(87);
     vertical.SetDegree(18);
 
     // Go same y as apple bucket
     turnAngle(true, 15);
-    float yAppleBucket = 20.27;
+    float yAppleBucket = 20.5;
     goDistance(true, 10.0);
-    check_y(yAppleBucket, MINUS);
+    check_y(yAppleBucket, PLUS);
 
     // Turn in line with bucket
     turnAngle(false, 50);
-    check_heading(182);
+    check_heading(176);
 
     // Go into bucket
-    float xPickupBucket = 12.34;
+    float xPickupBucket = 12.24;
+    goDistance(true, 2.5);
     check_x(xPickupBucket, MINUS);
 
     // Lift bucket
-    vertical.SetDegree(35);
+    vertical.SetDegree(50);
+    Sleep(1.0);
 
     // Go up the ramp
-    turnAngle(false, 160);
-    goDistance(true, 30.0);
     turnAngle(false, 110);
-    goDistance(true, 20.0);
+    Sleep(1.0);
+    check_heading(340);
+
+    goDistance(true, 26.0);
+    turnAngle(false, 105);
+    goDistance(true, 24.0);
 
     // follow line to platform
     followLine(false, 8.0);
@@ -106,8 +118,21 @@ void Milestone4()
     check_heading(platformHeading);
 
     // drop off bucket
+    horizontal.SetDegree(86);
+    Sleep(1.0);
     vertical.SetDegree(18);
+    Sleep(1.0);
     goDistance(false, 5.0);
+
+    // Turn to levers
+    turnAngle(false, 70);
+    check_heading(159);
+    
+    // Go to levers (add arm movement)
+    goDistance(true, 5.0);
+    check_x(17.71, MINUS);
+
+    // Flip levers
 }
 
 void Milestone3() 
@@ -326,7 +351,7 @@ void turnAngle(bool CW, int degrees) {
 // RCS Pulse Values
 #define RCS_WAIT_TIME_IN_SEC 0.35
 #define PULSE_TIME 0.1
-#define PULSE_POWER 50
+#define PULSE_POWER 20
 
 /*
  * Pulse forward or backward a short distance using time
@@ -335,11 +360,11 @@ void pulse_forward(bool forward, float seconds)
 {
     // Set both motors to desired percent
     if (forward) {
-        right_motor.SetPercent(GO_SPEED_RIGHT);
-        left_motor.SetPercent(GO_SPEED_LEFT);
+        right_motor.SetPercent(PULSE_POWER);
+        left_motor.SetPercent(PULSE_POWER);
     } else {
-        right_motor.SetPercent(BACK_SPEED_RIGHT);
-        left_motor.SetPercent(BACK_SPEED_LEFT);
+        right_motor.SetPercent(-PULSE_POWER);
+        left_motor.SetPercent(-PULSE_POWER);
     }
 
     // Wait for the correct number of seconds
@@ -357,11 +382,11 @@ void pulse_rotation(bool cw, float seconds)
 {
     // Set both motors to desired percent
     if (cw) {
-        right_motor.SetPercent(BACK_SPEED_RIGHT);
-        left_motor.SetPercent(GO_SPEED_LEFT);
+        right_motor.SetPercent(-PULSE_POWER);
+        left_motor.SetPercent(PULSE_POWER);
     } else {
-        right_motor.SetPercent(GO_SPEED_RIGHT);
-        left_motor.SetPercent(BACK_SPEED_LEFT);
+        right_motor.SetPercent(PULSE_POWER);
+        left_motor.SetPercent(-PULSE_POWER);
     }
 
     // Wait for the correct number of seconds
@@ -387,7 +412,7 @@ void check_x(float x_coordinate, int orientation)
 
     // Check if receiving proper RCS coordinates and whether the robot is within an acceptable range
     for (int i = 0; i < 10; i++) {
-        if(pose->x >= 0 && (pose->x < x_coordinate - 1 || pose->x > x_coordinate + 1))
+        while(pose->x >= 0 && (pose->x < x_coordinate - 1 || pose->x > x_coordinate + 1))
         {
             if (pose->x > x_coordinate + 1)
             {
@@ -446,7 +471,7 @@ void check_heading(float heading)
     RCSPose* pose = RCS.RequestPosition();
 
     for (int i = 0; i < 10; i++) {
-        while(pose->heading >= heading + 1 || pose->heading > heading - 1)
+        while(pose->heading > heading + 1 || pose->heading < heading - 1)
         {
             if(pose->heading > heading + 1)
             {
@@ -454,11 +479,13 @@ void check_heading(float heading)
             }
             else if(pose->heading < heading - 1)
             {
-                pulse_forward(false, PULSE_TIME);
+                pulse_rotation(false, PULSE_TIME);
             }
             Sleep(RCS_WAIT_TIME_IN_SEC);
             
             pose = RCS.RequestPosition();
+            LCD.Clear();
+            LCD.Write(pose->heading);
         }
     }   
 }
