@@ -307,6 +307,10 @@ void followLine(bool stopAtLine, double secs) {
 
 // Goes forward or backward an exact distance
 void goDistance(bool forward, float distance) {
+    // Reset counts
+    right_encoder.ResetCounts();
+    left_encoder.ResetCounts();
+
     // s = 2(pi)rn/N // n = sN/2(pi)r
     int countsLimit = (distance*IGWAN_TRANSITIONS)/(2*PI*WHEEL_RADIUS);
     if (forward) {
@@ -325,6 +329,10 @@ void goDistance(bool forward, float distance) {
 
 // Turns certain degrees clockwise or counter-clockwise
 void turnAngle(bool CW, int degrees) {
+    // Reset counts
+    right_encoder.ResetCounts();
+    left_encoder.ResetCounts();
+    
     // convert degrees to arc length
     float theta = degrees * (PI/180.);
     float distance = ROBOT_RADIUS*theta;
