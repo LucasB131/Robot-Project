@@ -17,7 +17,6 @@ void check_heading(float heading);
 void Milestone2();
 void Milestone3();
 void Milestone4();
-void Milestone4RCS();
 
 // exact pin locations to change
 FEHMotor left_motor(FEHMotor::Motor2, 9.0);
@@ -56,16 +55,11 @@ DigitalEncoder left_encoder(FEHIO::Pin10);
 #define RED_THRESHOLD 0.9
 
 void ERCMain() {
-    Milestone4RCS();
+    Milestone4();
 }
 
 void Milestone4()
 {
-
-}
-
-void Milestone4RCS()
-{ // Course A
     // Initialize RCS
     RCS.DisableRateLimit();
     RCS.InitializeTouchMenu("0300G3QCK");
@@ -80,7 +74,7 @@ void Milestone4RCS()
     Sleep(0.2);
 
     horizontal.SetDegree(87);
-    vertical.SetDegree(18);
+    vertical.SetDegree(19);
 
     // Go same y as apple bucket
     turnAngle(true, 15);
@@ -94,7 +88,7 @@ void Milestone4RCS()
 
     // Go into bucket
     float xPickupBucket = 12.24;
-    goDistance(true, 2.5);
+    goDistance(true, 4.0);
     check_x(xPickupBucket, MINUS);
 
     // Lift bucket
@@ -102,37 +96,58 @@ void Milestone4RCS()
     Sleep(1.0);
 
     // Go up the ramp
-    turnAngle(false, 110);
-    Sleep(1.0);
-    check_heading(340);
+    turnAngle(false, 160);
+    check_heading(330);
 
-    goDistance(true, 26.0);
+    goDistance(true, 16.0);
     turnAngle(false, 105);
-    goDistance(true, 24.0);
+    check_heading(91);
+    goDistance(true, 28.0);
+    check_y(47.65, PLUS);
 
     // follow line to platform
-    followLine(false, 8.0);
+    turnAngle(false, 90);
+    check_heading(184);
+    goDistance(true, 6.0);
+    check_x(23.93, MINUS);
 
     // align with platform
-    float platformHeading = 90;
+    turnAngle(true, 90);
+    float platformHeading = 91;
     check_heading(platformHeading);
+    goDistance(true, 18.0);
+    check_y(62.44, PLUS);
 
     // drop off bucket
     horizontal.SetDegree(86);
     Sleep(1.0);
-    vertical.SetDegree(18);
+    vertical.SetDegree(10);
     Sleep(1.0);
-    goDistance(false, 5.0);
+    goDistance(false, 2.5);
+    check_y(59.4, PLUS);
+
+
+    /* WIP Lever Flipping */
 
     // Turn to levers
     turnAngle(false, 70);
     check_heading(159);
     
-    // Go to levers (add arm movement)
-    goDistance(true, 5.0);
-    check_x(17.71, MINUS);
+    // Go to levers
+    vertical.SetDegree(50);
+    goDistance(true, 6);
+    turnAngle(false, 6);
 
     // Flip levers
+    vertical.SetDegree(0);
+    Sleep(5.0);
+    horizontal.SetDegree(140);
+    Sleep(0.5);
+    vertical.SetDegree(0);
+    Sleep(0.5);
+    horizontal.SetDegree(86);
+    Sleep(0.5);
+    vertical.SetDegree(40);
 }
 
 void Milestone3() 
@@ -239,7 +254,7 @@ void Milestone2()
 
 // Follows the line until all three sensors are on and until x seconds have passed
 void followLine(bool stopAtLine, double secs) {
-    bool left, middle, right, lastLeft; // false is off, true is on
+    bool left, middle, right, lastLeft = true; // false is off, true is on
     float goFasterSpeed = 20, goSpeed = 10, slowSpeed = -20;
     double initialTime = TimeNow(), elapsedTime;
 
@@ -353,12 +368,12 @@ void turnAngle(bool CW, int degrees) {
 }
 
 /* * * * * * * * */
-/* RCS Functions */
+/* RCS Functions */ // Modeled after Exploration 3 Skeleton Code
 /* * * * * * * * */
 
 // RCS Pulse Values
-#define RCS_WAIT_TIME_IN_SEC 0.35
-#define PULSE_TIME 0.1
+#define RCS_WAIT_TIME_IN_SEC 0.25
+#define PULSE_TIME 0.05
 #define PULSE_POWER 20
 
 /*
