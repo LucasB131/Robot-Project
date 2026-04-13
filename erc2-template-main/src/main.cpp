@@ -7,18 +7,23 @@
 #include <FEHRCS.h>
 #include <FEHMotor.h>
 
-// function declarations
+/* Movement Functions */
 void followLine(bool stopAtLine, double secs);
 void goDistance(bool forward, float distance);
 void turnAngle(bool CW, int degrees);
 void check_x(float x_coordinate, int orientation);
 void check_y(float y_coordinate, int orientation);
 void check_heading(float heading);
+/* Milestone Functions */
 void Milestone2();
 void Milestone3();
 void Milestone4();
+/* Full Course Completion Functions */
+void CourseP1();
+void CourseP2();
+void CourseP3();
 
-// exact pin locations to change
+/* Pins */
 FEHMotor left_motor(FEHMotor::Motor2, 9.0);
 FEHMotor right_motor(FEHMotor::Motor1, 9.0);
 
@@ -34,7 +39,7 @@ AnalogInputPin left_opto(FEHIO::Pin14);
 DigitalEncoder right_encoder(FEHIO::Pin9);
 DigitalEncoder left_encoder(FEHIO::Pin10);
 
-// Global Constants
+/* Global Constants */
 #define PI 3.141592653
 
 #define WHEEL_RADIUS 1.25 // inches
@@ -54,8 +59,81 @@ DigitalEncoder left_encoder(FEHIO::Pin10);
 #define STARTLIGHT_THRESHOLD 2.5
 #define RED_THRESHOLD 0.9
 
+/* Implementaiton */
 void ERCMain() {
-    Milestone4();
+    // Initialize RCS
+    RCS.InitializeTouchMenu("0300G3QCK");
+
+    // Wait for CDS value to read start light activation
+    while (cds.Value() > STARTLIGHT_THRESHOLD) {};
+
+    // Course
+    CourseP1();
+}
+
+// P1 covers apple bucket pickup and drop off
+void CourseP1()
+{
+    // Go into and out of the button
+    goDistance(false, 4.0);
+    Sleep(0.2);
+    goDistance(true, 2.0);
+    Sleep(0.2);
+    check_heading(135);
+    goDistance(true, 5.0);
+
+    horizontal.SetDegree(87);
+    vertical.SetDegree(19);
+
+    // Go same y as apple bucket
+    turnAngle(true, 15);
+    float yAppleBucket = 20.5;
+    goDistance(true, 10.0);
+    check_y(yAppleBucket, PLUS);
+
+    // Turn in line with bucket
+    turnAngle(false, 50);
+    check_heading(176);
+
+    // Go into bucket
+    float xPickupBucket = 12.24;
+    goDistance(true, 4.0);
+    check_x(xPickupBucket, MINUS);
+
+    // Lift bucket
+    vertical.SetDegree(50);
+    Sleep(1.0);
+
+    // Go up the ramp
+    turnAngle(false, 160);
+    check_heading(330);
+
+    goDistance(true, 16.0);
+    turnAngle(false, 105);
+    check_heading(91);
+    goDistance(true, 28.0);
+    check_y(47.65, PLUS);
+
+    // follow line to platform
+    turnAngle(false, 90);
+    check_heading(184);
+    goDistance(true, 6.0);
+    check_x(23.93, MINUS);
+
+    // align with platform
+    turnAngle(true, 90);
+    float platformHeading = 91;
+    check_heading(platformHeading);
+    goDistance(true, 18.0);
+    check_y(62.44, PLUS);
+
+    // drop off bucket
+    horizontal.SetDegree(86);
+    Sleep(1.0);
+    vertical.SetDegree(10);
+    Sleep(1.0);
+    goDistance(false, 2.5);
+    check_y(59.4, PLUS);
 }
 
 void Milestone4()
