@@ -437,14 +437,20 @@ void check_x(float x_coordinate, int orientation)
     for (int i = 0; i < 7; i++) {
         if(pose->x >= 0 && (pose->x < x_coordinate - 1 || pose->x > x_coordinate + 1))
         {
-            if (pose->x > x_coordinate + 1)
+            if (pose->x > x_coordinate + 3)
             {
-                // Pulse the motors for a short duration in the correct direction
+                pulse_forward(!positive, 3 * PULSE_TIME);
+            }
+            else if(pose->x < x_coordinate - 3)
+            {
+                pulse_forward(positive, 3 * PULSE_TIME);
+            }
+            else if (pose->x > x_coordinate + 1)
+            {
                 pulse_forward(!positive, PULSE_TIME);
             }
             else if(pose->x < x_coordinate - 1)
             {
-                // Pulse the motors for a short duration in the correct direction
                 pulse_forward(positive, PULSE_TIME);
             }
             Sleep(RCS_WAIT_TIME_IN_SEC);
@@ -471,7 +477,15 @@ void check_y(float y_coordinate, int orientation)
     for (int i = 0; i < 7; i++) {
         if(pose->y >= 0 && (pose->y < y_coordinate - 1 || pose->y > y_coordinate + 1))
         {
-            if(pose->y > y_coordinate + 1)
+            if(pose->y > y_coordinate + 3)
+            {
+                pulse_forward(!positive, 3 * PULSE_TIME);
+            }
+            else if(pose->y < y_coordinate - 3)
+            {
+                pulse_forward(positive, 3 * PULSE_TIME);
+            }
+            else if(pose->y > y_coordinate + 1)
             {
                 pulse_forward(!positive, PULSE_TIME);
             }
@@ -496,7 +510,15 @@ void check_heading(float heading)
     for (int i = 0; i < 7; i++) {
         if(pose->heading > heading + 1 || pose->heading < heading - 1)
         {
-            if(pose->heading > heading + 1)
+            if(pose->heading > heading + 3)
+            {
+                pulse_rotation(true, 3 * PULSE_TIME);
+            }
+            else if(pose->heading < heading - 3)
+            {
+                pulse_rotation(false, 3 * PULSE_TIME);
+            }
+            else if(pose->heading > heading + 1)
             {
                 pulse_rotation(true, PULSE_TIME);
             }
