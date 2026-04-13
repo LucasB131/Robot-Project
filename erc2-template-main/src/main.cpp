@@ -513,6 +513,13 @@ void check_x(float x_coordinate, int orientation)
 
     // Check if receiving proper RCS coordinates and whether the robot is within an acceptable range
     for (int i = 0; i < 7; i++) {
+
+        if (pose->x < 0) {
+            LCD.Clear();
+            LCD.Write("Invalid value");
+            return;
+        }
+
         if(pose->x >= 0 && (pose->x < x_coordinate - 1 || pose->x > x_coordinate + 1))
         {
             if (pose->x > x_coordinate + 3)
@@ -553,6 +560,13 @@ void check_y(float y_coordinate, int orientation)
     RCSPose* pose = RCS.RequestPosition();
 
     for (int i = 0; i < 7; i++) {
+
+        if (pose->y < 0) {
+            LCD.Clear();
+            LCD.Write("Invalid value");
+            return;
+        }
+
         if(pose->y >= 0 && (pose->y < y_coordinate - 1 || pose->y > y_coordinate + 1))
         {
             if(pose->y > y_coordinate + 3)
@@ -586,6 +600,13 @@ void check_heading(float heading)
     RCSPose* pose = RCS.RequestPosition();
 
     for (int i = 0; i < 7; i++) {
+
+        if (pose->heading < 0) {
+            LCD.Clear();
+            LCD.Write("Invalid value");
+            return;
+        }
+
         if(pose->heading > heading + 1 || pose->heading < heading - 1)
         {
             if(pose->heading > heading + 3)
