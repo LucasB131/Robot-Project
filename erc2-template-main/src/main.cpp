@@ -195,6 +195,11 @@ void CourseP2()
         turnAngle(false, 90);
         Sleep(0.2);
         goDistance(true, 7.0);
+
+        // return to start of line by ramp
+        goDistance(false, 2.0);
+        turnAngle(false, 155);
+        goDistance(true, 10.0);
     } else {
         LCD.Clear();
         LCD.Write("blue");
@@ -206,7 +211,35 @@ void CourseP2()
         turnAngle(true, 90);
         Sleep(0.2);
         goDistance(true, 7.0);
+
+        // return to start of line by ramp
+        goDistance(false, 2.0);
+        turnAngle(true, 190);
+        goDistance(true, 9.0);
     }
+    followLine(true, 0); // will stop by the bend
+    goDistance(true, 3.0);
+    turnAngle(true, 90);
+    followLine(false, 0.5);
+    turnAngle(false, 10);
+    check_heading(270);
+}
+
+// window and final button starting at start of line
+void CourseP3()
+{
+    goDistance(false, 4.0);
+    vertical.SetDegree(20);
+    horizontal.SetDegree(180);
+    turnAngle(true, 90);
+    goDistance(true, 13.5);
+
+    // return to final button
+    goDistance(false, 2.0);
+    check_heading(180);
+    goDistance(false, 11.5);
+    turnAngle(false, 90);
+    goDistance(true, 40.0);
 }
 
 void Milestone4()
