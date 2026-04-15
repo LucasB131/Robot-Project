@@ -21,8 +21,10 @@ void Milestone4();
 /* Full Course Completion Functions */
 void Course();
 void CourseP1();
+void CourseP1FallBack();
 void CourseP2();
 void CourseP3();
+void CourseP3FallBack();
 
 /* Pins */
 FEHMotor left_motor(FEHMotor::Motor2, 9.0);
@@ -47,10 +49,10 @@ DigitalEncoder left_encoder(FEHIO::Pin10);
 #define ROBOT_RADIUS 8.10/2.0 // inches
 #define IGWAN_TRANSITIONS 318.
 
-#define GO_SPEED_RIGHT 40
-#define GO_SPEED_LEFT 40
-#define BACK_SPEED_RIGHT -40
-#define BACK_SPEED_LEFT -40
+#define GO_SPEED_RIGHT 35
+#define GO_SPEED_LEFT 35
+#define BACK_SPEED_RIGHT -35
+#define BACK_SPEED_LEFT -35
 
 // aruco code orientation constants
 #define PLUS 1
@@ -73,64 +75,76 @@ void Course() {
     while (cds.Value() > STARTLIGHT_THRESHOLD) {};
 
     // Course
-    CourseP1();
+    // CourseP1();
+    CourseP1FallBack();
     CourseP2();
+    CourseP3FallBack();
 }
 
 // P1 covers apple bucket pickup and drop off
 void CourseP1()
 {
     // Go into and out of the button
-    goDistance(false, 3.0);
+    goDistance(false, 4.0);
     Sleep(0.2);
     goDistance(true, 2.0);
     Sleep(0.2);
     check_heading(135);
     goDistance(true, 5.0);
 
-    horizontal.SetDegree(87);
-    vertical.SetDegree(24);
+    horizontal.SetDegree(82);
+    vertical.SetDegree(29);
 
     // Go same y as apple bucket
     turnAngle(true, 15);
     float yAppleBucket = 20.5;
-    goDistance(true, 12.0);
+    goDistance(true, 10.0);
     check_y(yAppleBucket, PLUS);
 
     // Turn in line with bucket
     turnAngle(false, 50);
-    check_heading(176);
+    check_heading(178);
 
     // Go into bucket
-    float xPickupBucket = 12.24;
-    goDistance(true, 4.0);
+    float xPickupBucket = 11;
+    goDistance(true, 5.0);
     check_x(xPickupBucket, MINUS);
 
     // Lift bucket
-    vertical.SetDegree(50);
+    vertical.SetDegree(55);
     Sleep(1.0);
 
-    // Go up the ramp (incorporate line following?)
-    turnAngle(false, 160);
-    check_heading(330);
+    // Go up the ramp
+    turnAngle(false, 160);   //removed check heading (330)
 
+
+    /*  
     goDistance(true, 16.0);
     turnAngle(false, 105);
-    check_heading(91);
+    check_heading(86);
+    goDistance(true, 28.0);
+    check_y(47.65, PLUS);
+    */
+
+    goDistance(true, 20.0);
+    goDistance(false, 1.0);
+    turnAngle(false, 83);
     goDistance(true, 28.0);
     check_y(47.65, PLUS);
 
-    // follow line to platform
+
+    // go to crate
     turnAngle(false, 90);
     check_heading(184);
     goDistance(true, 6.0);
-    check_x(23.93, MINUS);
+    check_x(24.23, MINUS);
 
-    // align with platform
+    // align with crate
     turnAngle(true, 90);
-    float platformHeading = 91;
-    check_heading(platformHeading);
-    goDistance(true, 18.0);
+    check_heading(85);
+    goDistance(true, 5.0);
+    followLine(false, 1.0);
+    goDistance(true, 1.0);
     check_y(62.44, PLUS);
 
     // drop off bucket
@@ -138,43 +152,80 @@ void CourseP1()
     Sleep(1.0);
     vertical.SetDegree(10);
     Sleep(1.0);
-
     goDistance(false, 2.5);
+    check_y(59.4, PLUS);
+}
+
+void CourseP1FallBack()
+{
+    // Go into and out of the button
+    goDistance(false, 4.0);
+    Sleep(0.2);
+    goDistance(true, 3.0);
+    Sleep(0.2);
+    turnAngle(true, 48);
+    check_heading(82);
+
+    // go up ramp
+    goDistance(true, 34);
+    followLine(true, 0);
+
+    // bend
+    goDistance(true, 5.0);
+    turnAngle(true, 60);
+    followLine(false, 1.0);
+    goDistance(true, 6.0);
+    goDistance(false, 2.0);
 }
 
 // Humidifer button from apple bucket drop off
 void CourseP2()
 {
     // follow line to intersection
-    turnAngle(false, 55);
+    vertical.SetDegree(90);
+    horizontal.SetDegree(80);
+    turnAngle(false, 45);
 
     // levers
-    goDistance(true, 6.0);
+    goDistance(true, 5.5);
 
     // arm movements
-    vertical.SetDegree(15);
-    Sleep(0.5);
-    horizontal.SetDegree(140);
+    vertical.SetDegree(10);
+    Sleep(0.2);
+    vertical.SetDegree(90);
+    horizontal.SetDegree(125);
     Sleep(0.5);
     vertical.SetDegree(0);
     Sleep(0.5);
-    horizontal.SetDegree(86);
+    horizontal.SetDegree(80);
     Sleep(0.5);
     vertical.SetDegree(40);
+    Sleep(0.2);
+    vertical.SetDegree(90);
+    Sleep(0.5);
+    horizontal.SetDegree(80);
+    Sleep(0.1);
+    vertical.SetDegree(0);
+    Sleep(0.2);
+    horizontal.SetDegree(125);
+    Sleep(0.2);
+    vertical.SetDegree(60);
+    Sleep(0.2);
+    vertical.SetDegree(10);
+    Sleep(0.2);
 
     goDistance(false, 6.0);
     // continue with buttons
-    turnAngle(false, 115);
+    turnAngle(false, 125);
     followLine(true, 0);
     // move arms to safe position
     vertical.SetDegree(90);
     horizontal.SetDegree(90);
     
     // follow line to light
-    goDistance(true, 3.0);
-    turnAngle(true, 90);
+    goDistance(true, 5.0);
+    turnAngle(true, 100);
     followLine(true, 0);
-    turnAngle(true, 15);
 
     // Move a little forward x inches to read the CDS cell
     goDistance(true, 7.0);
@@ -184,7 +235,7 @@ void CourseP2()
     bool red = cds.Value() < RED_THRESHOLD;
     
     // Hit button according to which light turned on
-    if (red) {
+    if (false && red) {
         LCD.Clear();
         LCD.Write("red");
         // turn and go to hit red on right
@@ -214,21 +265,18 @@ void CourseP2()
 
         // return to start of line by ramp
         goDistance(false, 2.0);
-        turnAngle(true, 190);
-        goDistance(true, 9.0);
+        turnAngle(true, 175);
+        goDistance(true, 11.0);
+        turnAngle(true, 100);
+        followLine(false, 1.3);
+        check_heading(270);
     }
-    followLine(true, 0); // will stop by the bend
-    goDistance(true, 3.0);
-    turnAngle(true, 90);
-    followLine(false, 0.5);
-    turnAngle(false, 10);
-    check_heading(270);
 }
 
 // window and final button starting at start of line
 void CourseP3()
 {
-    goDistance(false, 4.0);
+    goDistance(false, 9.0);
     vertical.SetDegree(20);
     horizontal.SetDegree(180);
     turnAngle(true, 90);
@@ -240,6 +288,12 @@ void CourseP3()
     goDistance(false, 11.5);
     turnAngle(false, 90);
     goDistance(true, 40.0);
+}
+
+void CourseP3FallBack()
+{
+    check_heading(270);
+    goDistance(true, 38.0);
 }
 
 void Milestone4()
@@ -558,7 +612,7 @@ void turnAngle(bool CW, int degrees) {
 // RCS Pulse Values
 #define RCS_WAIT_TIME_IN_SEC 0.25
 #define PULSE_TIME 0.05
-#define PULSE_POWER 17
+#define PULSE_POWER 12
 
 /*
  * Pulse forward or backward a short distance using time
@@ -618,7 +672,7 @@ void check_x(float x_coordinate, int orientation)
     RCSPose* pose = RCS.RequestPosition();
 
     // Check if receiving proper RCS coordinates and whether the robot is within an acceptable range
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 9; i++) {
 
         if (pose->x < 0) {
             LCD.Clear();
@@ -665,7 +719,7 @@ void check_y(float y_coordinate, int orientation)
 
     RCSPose* pose = RCS.RequestPosition();
 
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 9; i++) {
 
         if (pose->y < 0) {
             LCD.Clear();
@@ -705,7 +759,7 @@ void check_heading(float heading)
 {
     RCSPose* pose = RCS.RequestPosition();
 
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 9; i++) {
 
         if (pose->heading < 0) {
             LCD.Clear();
